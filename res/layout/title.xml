@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/header"
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_height="wrap_content" android:layout_width="fill_parent">
+
+    <ImageView android:src="@drawable/ic_launcher"
+               android:layout_width="wrap_content" android:layout_alignParentLeft="true"
+               android:layout_centerVertical="true" android:id="@+id/back"
+               android:layout_height="wrap_content" android:layout_alignParentTop="true"
+               android:contentDescription="@string/app_name"/>
+
+    <TextView android:id="@+id/title" android:layout_width="wrap_content"
+              android:gravity="center_vertical" android:textSize="12sp"
+              android:textColor="#ffffff" android:layout_alignParentRight="true"
+              android:text="@string/titleText" android:background="#a5c639"
+              android:layout_height="wrap_content" android:layout_alignParentTop="true"
+              android:padding="9dip" android:layout_margin="5dip"/>
+</RelativeLayout>

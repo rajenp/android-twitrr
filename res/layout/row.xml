@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:weightSum="1.0"
+        android:orientation="horizontal">
+
+    <ImageView
+            android:layout_width="60dp"
+            android:layout_height="50dp"
+            android:id="@+id/imageView"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/profileIconText"/>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:weightSum="1.0"
+            android:layout_height="match_parent" android:layout_gravity="center">
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_weight=".3"
+                android:weightSum="1.0"
+                android:layout_height="0dp" android:layout_gravity="center">
+
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight=".73"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/holo_blue_light"
+                    android:id="@+id/userNameView" android:layout_gravity="center" android:textSize="14sp"/>
+            <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text=""
+                    android:layout_weight=".27"
+                    android:textColor="#888888"
+                    android:paddingRight="10dp"
+                    android:id="@+id/timeView" android:gravity="right" android:textSize="10sp"/>
+        </LinearLayout>
+
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:textColor="@android:color/secondary_text_dark"
+                android:textSize="12sp"
+                android:text=""
+                android:padding="1dp"
+                android:layout_weight=".7"
+                android:id="@+id/tweetTextView" android:layout_gravity="center"/>
+    </LinearLayout>
+
+
+</LinearLayout>

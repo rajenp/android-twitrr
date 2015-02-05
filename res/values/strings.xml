@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Twitrr</string>
+    <string name="titleText">Twitter</string>
+    <string name="profileIconText">Profile Icon</string>
+    <string name="composeNewTweet">Compose new Tweet...</string>
+    <string name="t140">140</string>
+    <string name="tweetButtonLabel">Tweet</string>
+    <string name="closeButtonLabel">Close</string>
+    <string name="replyButtonLabel">Reply</string>
+    <string name="retweetButtonLabel">Retweet</string>
+</resources>
