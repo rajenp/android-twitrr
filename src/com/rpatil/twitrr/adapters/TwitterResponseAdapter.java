@@ -40,6 +40,5 @@ public class TwitterResponseAdapter extends TwitterAdapter {
     public void onException(TwitterException te, TwitterMethod method) {
         super.onException(te, method);
         te.printStackTrace();
-        activity.showProgressBar(false);
     }
 }

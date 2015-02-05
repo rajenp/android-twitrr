@@ -377,7 +377,12 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
     }
 
     public void updatedStatus(Status status) {
-        //TODO
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getActionBar().selectTab(getActionBar().getTabAt(TAB_HOME));
+            }
+        });
     }
 
     public void gotDirectMessages(ResponseList<DirectMessage> messages) {
@@ -401,7 +406,12 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
     }
 
     public void sentDirectMessage(DirectMessage message) {
-        //TODO
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                getActionBar().selectTab(getActionBar().getTabAt(TAB_HOME));
+            }
+        });
     }
 
     @Override
