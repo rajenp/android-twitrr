@@ -32,3 +32,5 @@ proguard/
 *.log
 
 proguard-project.txt
+
+src/com/rpatil/twitrr/APIKeys.java
