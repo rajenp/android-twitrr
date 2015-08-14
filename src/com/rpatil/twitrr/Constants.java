@@ -5,7 +5,7 @@ package com.rpatil.twitrr;
  */
 public class Constants {
 
-    public static final String MY_APP_NAME = "com.rpatil.lotsInfo.TweetPlugin";
+    public static final String MY_APP_NAME = "Twittr";
 
     // Preference Constants
     public static final String PREF_KEY_OAUTH_TOKEN = "oauth_token";
@@ -17,4 +17,8 @@ public class Constants {
 
     public static final String PREF_KEY_REQ_TOKEN = "oauth_req_token";
     public static final String PREF_KEY_REQ_TOKEN_SEC = "oauth_req_token_sec";
+
+    public static boolean isLoggable() {
+        return BuildConfig.DEBUG;
+    }
 }

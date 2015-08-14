@@ -1,7 +1,13 @@
 package com.rpatil.twitrr.adapters;
 
-import com.rpatil.twitrr.activities.MainUIActivity;
-import twitter4j.*;
+import com.rpatil.twitrr.ui.activities.MainUIActivity;
+
+import twitter4j.DirectMessage;
+import twitter4j.ResponseList;
+import twitter4j.Status;
+import twitter4j.TwitterAdapter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterMethod;
 
 public class TwitterResponseAdapter extends TwitterAdapter {
 

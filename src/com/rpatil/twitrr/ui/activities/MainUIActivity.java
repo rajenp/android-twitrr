@@ -1,4 +1,4 @@
-package com.rpatil.twitrr.activities;
+package com.rpatil.twitrr.ui.activities;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -6,24 +6,41 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.ViewFlipper;
+
 import com.rpatil.twitrr.Constants;
 import com.rpatil.twitrr.R;
 import com.rpatil.twitrr.adapters.TweetViewListAdapter;
 import com.rpatil.twitrr.adapters.TwitterResponseAdapter;
-import twitter4j.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import twitter4j.AsyncTwitter;
+import twitter4j.DirectMessage;
+import twitter4j.Paging;
+import twitter4j.ResponseList;
+import twitter4j.Status;
+import twitter4j.StatusUpdate;
 
 public class MainUIActivity extends Activity implements ActionBar.TabListener {
 
@@ -32,13 +49,13 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
     public static final int TAB_MESSAGES = 2;
     public static final int TAB_COMPOSE = 3;
 
-    private static final int LIST_VIEW = 0;
-    private static final int COMPOSE_VIEW = 1;
-    private static final int DETAIL_VIEW = 2;
+    private int listViewIndex;
+    private int composeViewIndex;
+    private int detailedViewIndex;
 
-    private List tweets = new ArrayList();
-    private List mentions = new ArrayList();
-    private List messages = new ArrayList();
+    private List<Status> tweets = new ArrayList<Status>();
+    private List<Status> mentions = new ArrayList<Status>();
+    private List<DirectMessage> messages = new ArrayList<DirectMessage>();
 
     private Object currentTweet; //Status or DM
 
@@ -47,6 +64,17 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
 
     private ViewFlipper flipper;
 
+    private Menu mMenu = null;
+
+    private ActionBar mActionBar = null;
+
+    private void initViewFlipperIndexes() {
+        flipper = (ViewFlipper) findViewById(R.id.viewFlipper);
+        listViewIndex = flipper.indexOfChild(findViewById(R.id.listView));
+        composeViewIndex = flipper.indexOfChild(findViewById(R.id.composeView));
+        detailedViewIndex = flipper.indexOfChild(findViewById(R.id.detailedView));
+    }
+
     /**
      * Called when the activity is first created.
      */
@@ -54,16 +82,21 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        mActionBar = getActionBar();
+        if (mActionBar == null) {
+            requestWindowFeature(Window.FEATURE_ACTION_BAR);
+            mActionBar = getActionBar();
+        }
+
+        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         setContentView(R.layout.main);
-        setTitle("Twitter");
+        setTitle(Constants.MY_APP_NAME);
 
+        initViewFlipperIndexes();
 
-        flipper = (ViewFlipper) findViewById(R.id.viewFlipper);
-    /*flipper.setInAnimation(this, R.anim.push_left_in);
-    flipper.setOutAnimation(this, R.anim.push_left_out);*/
+        /*flipper.setInAnimation(this, R.anim.push_left_in);
+        flipper.setOutAnimation(this, R.anim.push_left_out);*/
 
         final EditText tweetComposeEdit = (EditText) findViewById(R.id.tweetComposeEdit);
         tweetComposeEdit.addTextChangedListener(new TextWatcher() {
@@ -107,7 +140,8 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         dvCloseButton.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View button) {
-                flipper.setDisplayedChild(LIST_VIEW);
+                currentTweet = null; //reset current tweet
+                flipper.setDisplayedChild(listViewIndex);
             }
         });
 
@@ -115,7 +149,7 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         dvReplyButton.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View button) {
-                getActionBar().selectTab(getActionBar().getTabAt(TAB_COMPOSE));
+                mActionBar.selectTab(mActionBar.getTabAt(TAB_COMPOSE));
             }
         });
 
@@ -123,7 +157,7 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> myAdapter, View myView, int myItemInt, long myLong) {
-                flipper.setDisplayedChild(DETAIL_VIEW);
+                flipper.setDisplayedChild(detailedViewIndex);
                 TweetViewListAdapter.TweetRowViewHolder viewHolder = (TweetViewListAdapter.TweetRowViewHolder) myView.getTag();
                 currentTweet = viewHolder.getData();
                 fillDetailView(viewHolder);
@@ -133,28 +167,27 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         twitter = AuthActivity.getTwitterInstance(getApplicationContext().getSharedPreferences(Constants.MY_APP_NAME, MODE_PRIVATE));
         twitter.addListener(new TwitterResponseAdapter(this));
 
-        ActionBar.Tab tab = actionBar.newTab();
-        tab.setText("TimeLine");
+        ActionBar.Tab tab = mActionBar.newTab();
+        tab.setText(R.string.timeline);
         tab.setTabListener(this);
-        actionBar.addTab(tab);
+        mActionBar.addTab(tab);
 
-        tab = actionBar.newTab();
-        tab.setText("Mentions");
+        tab = mActionBar.newTab();
+        tab.setText(R.string.mentions);
         tab.setTabListener(this);
         loadFromServer(1, false);
-        actionBar.addTab(tab);
+        mActionBar.addTab(tab);
 
-        tab = actionBar.newTab();
-        tab.setText("Messages");
+        tab = mActionBar.newTab();
+        tab.setText(R.string.messages);
         tab.setTabListener(this);
         loadFromServer(2, false);
-        actionBar.addTab(tab);
+        mActionBar.addTab(tab);
 
-        tab = actionBar.newTab();
-        tab.setText("Tweet");
+        tab = mActionBar.newTab();
+        tab.setText(R.string.compose);
         tab.setTabListener(this);
-        actionBar.addTab(tab);
-
+        mActionBar.addTab(tab);
 
     }
 
@@ -166,7 +199,7 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         ImageView image2 = (ImageView) findViewById(R.id.dvImageView);
         TextView timeView2 = (TextView) findViewById(R.id.dvTimeView);
 
-        userName2.setText(viewHolder.getUserName().getText());
+        userName2.setText(Html.fromHtml(viewHolder.getUserHtmlText()));
         tweetText2.setText(viewHolder.getTweetText().getText());
         image2.setImageDrawable(viewHolder.getImage().getDrawable());
         timeView2.setText(viewHolder.getTimeText().getText());
@@ -175,11 +208,11 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
 
     @Override
     public void onBackPressed() {
-        if (flipper.getDisplayedChild() == COMPOSE_VIEW) {
-            getActionBar().selectTab(getActionBar().getTabAt(this.currentTabIndex));
+        if (flipper.getDisplayedChild() == composeViewIndex) {
+            mActionBar.selectTab(mActionBar.getTabAt(this.currentTabIndex));
         } else if (this.currentTweet != null) {
             this.currentTweet = null;
-            flipper.setDisplayedChild(LIST_VIEW);
+            flipper.setDisplayedChild(listViewIndex);
         } else {
             super.onBackPressed();
         }
@@ -241,20 +274,24 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
     }
 
     public void showProgressBar(boolean show) {
+        if (mMenu == null) return;
+
+        MenuItem item = mMenu.findItem(R.id.reloadMenu);
+
         if (show) {
-            ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.VISIBLE);
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View abprogress = inflater.inflate(R.layout.progressbar, null);
+            item.setActionView(abprogress);
         } else {
-            ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
-            progressBar.setVisibility(View.GONE);
+            item.setActionView(null);
         }
     }
 
     private void reloadList() {
         ListView listView = (ListView) findViewById(R.id.listView);
-        flipper.setDisplayedChild(LIST_VIEW);
+        flipper.setDisplayedChild(listViewIndex);
         ArrayAdapter arrayAdapter = (ArrayAdapter) listView.getAdapter();
-        List list = new ArrayList();
+        List<Object> list = new ArrayList<Object>();
         switch (this.currentTabIndex) {
             case TAB_MENTIONS:
                 list.addAll(mentions);
@@ -302,14 +339,16 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
                 tweetText.setText(extractUsersFrom(inReplyTo.getSenderScreenName(), text));
             }
         }
-        flipper.setDisplayedChild(COMPOSE_VIEW);
+        flipper.setDisplayedChild(composeViewIndex);
         showKeyboard(tweetText);
         tweetText.setSelection(0, tweetText.getText().length());
     }
 
     @Override
     public void onTabSelected(final ActionBar.Tab tab, FragmentTransaction ft) {
-        Log.d(Constants.MY_APP_NAME, "View: " + flipper.getDisplayedChild());
+        if (Constants.isLoggable()) {
+            Log.d(Constants.MY_APP_NAME, "View: " + flipper.getDisplayedChild());
+        }
         EditText tweetText = (EditText) findViewById(R.id.tweetComposeEdit);
         if (tab.getPosition() == TAB_COMPOSE) {
             this.showCompose(tweetText);
@@ -317,7 +356,7 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         } else {
             this.currentTweet = null;
             hideKeyboard(tweetText);
-            flipper.setDisplayedChild(LIST_VIEW);
+            flipper.setDisplayedChild(listViewIndex);
         }
         this.currentTabIndex = tab.getPosition();
         loadFromServer(tab.getPosition(), false);
@@ -341,7 +380,9 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         super.onDestroy();
         EditText tweetText = (EditText) findViewById(R.id.tweetComposeEdit);
         hideKeyboard(tweetText);
-        Log.d(Constants.MY_APP_NAME, "Destroyed");
+        if (Constants.isLoggable()) {
+            Log.d(Constants.MY_APP_NAME, "Destroyed");
+        }
     }
 
   /*@Override
@@ -380,7 +421,7 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActionBar().selectTab(getActionBar().getTabAt(TAB_HOME));
+                mActionBar.selectTab(mActionBar.getTabAt(TAB_HOME));
             }
         });
     }
@@ -409,7 +450,7 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getActionBar().selectTab(getActionBar().getTabAt(TAB_HOME));
+                mActionBar.selectTab(mActionBar.getTabAt(TAB_HOME));
             }
         });
     }
@@ -417,20 +458,21 @@ public class MainUIActivity extends Activity implements ActionBar.TabListener {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.layout.menu, menu);
-        return true;
+        menuInflater.inflate(R.menu.main_activity_actions, menu);
+        mMenu = menu;
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**
-     * Event Handling for Individual menu item selected
-     * Identify single menu item by it's id
+     * Event Handling for Individual main_activity_actions item selected
+     * Identify single main_activity_actions item by it's id
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case R.id.aboutMenu:
-                return true;
+            case R.id.composeMenu:
+                mActionBar.selectTab(mActionBar.getTabAt(TAB_COMPOSE));
             case R.id.logoutMenu:
                 getSharedPreferences(Constants.MY_APP_NAME, 0).edit().clear().commit();
                 return true;

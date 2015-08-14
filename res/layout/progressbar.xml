@@ -1,0 +1,9 @@
+<ProgressBar
+    android:id="@+id/progressBar"
+    android:layout_width="fill_parent"
+    android:layout_height="50dp"
+    android:layout_gravity="center"
+    android:background="@drawable/borders"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
+
+        

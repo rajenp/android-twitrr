@@ -1,19 +1,22 @@
 package com.rpatil.twitrr.adapters;
 
 import android.content.Context;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.androidquery.AQuery;
 import com.rpatil.twitrr.R;
+
+import java.util.List;
+
 import twitter4j.DirectMessage;
 import twitter4j.Status;
-
-import java.util.Date;
-import java.util.List;
+import twitter4j.User;
 
 /**
  * @author Rajendra Patil
@@ -27,6 +30,7 @@ public class TweetViewListAdapter extends ArrayAdapter<Object> {
         private ImageView image;
         private TextView tweetText;
         private Object data;
+        private AQuery aQuery;
 
         public Object getData() {
             return data;
@@ -67,6 +71,24 @@ public class TweetViewListAdapter extends ArrayAdapter<Object> {
         public void setTweetText(TextView tweetText) {
             this.tweetText = tweetText;
         }
+
+        public AQuery getaQuery() {
+            return aQuery;
+        }
+
+        public void setaQuery(AQuery aQuery) {
+            this.aQuery = aQuery;
+        }
+
+        public String getUserHtmlText() {
+            User user = null;
+            if (data instanceof Status) {
+                user = ((Status) data).getUser();
+            } else if (data instanceof DirectMessage) {
+                user = ((DirectMessage) data).getSender();
+            }
+            return user != null ? String.format("<h3>%s</h3><p><small>%s</small></p>", user.getName(), user.getDescription()) : "Unknown";
+        }
     }
 
     private static final int SECOND_MILLIS = 1000;
@@ -87,24 +109,29 @@ public class TweetViewListAdapter extends ArrayAdapter<Object> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-
         Object object = values.get(position);
+        AQuery aq;
+        TweetRowViewHolder viewHolder;
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.row, parent, false);
 
-            TweetRowViewHolder viewHolder = new TweetRowViewHolder();
-
+            viewHolder = new TweetRowViewHolder();
+            aq = new AQuery(convertView);
+            viewHolder.setaQuery(aq);
             viewHolder.setUserName((TextView) convertView.findViewById(R.id.userNameView));
             viewHolder.setTweetText((TextView) convertView.findViewById(R.id.tweetTextView));
             viewHolder.setTimeText((TextView) convertView.findViewById(R.id.timeView));
             viewHolder.setImage((ImageView) convertView.findViewById(R.id.imageView));
-            viewHolder.setData(object);
             convertView.setTag(viewHolder);
+
+        } else {
+            viewHolder = (TweetRowViewHolder) convertView.getTag();
+            aq = viewHolder.getaQuery();
         }
 
-        TweetRowViewHolder viewHolder = (TweetRowViewHolder) convertView.getTag();
+        viewHolder.setData(object);
 
         String userName = "", timeText = "", tweetText = "", profileImageUrl = null;
 
@@ -125,40 +152,13 @@ public class TweetViewListAdapter extends ArrayAdapter<Object> {
         viewHolder.getUserName().setText(userName);
         viewHolder.getTweetText().setText(tweetText);
         viewHolder.getTimeText().setText(timeText);
-
-        AQuery aq = new AQuery(convertView);
         aq.id(viewHolder.getImage()).image(profileImageUrl, true, false);
 
         return convertView;
     }
 
     private String timeToString(long time) {
-        //return DateUtils.getRelativeTimeSpanString(context, time).toString();
-        if (time < 1000000000000L) {
-            // if timestamp given in seconds, convert to millis
-            time *= 1000;
-        }
-
-        long now = new Date().getTime();
-        if (time > now || time <= 0) {
-            return null;
-        }
-        final long diff = now - time;
-        if (diff < MINUTE_MILLIS) {
-            return "just now";
-        } else if (diff < 2 * MINUTE_MILLIS) {
-            return "a min ago";
-        } else if (diff < 50 * MINUTE_MILLIS) {
-            return diff / MINUTE_MILLIS + " mins ago";
-        } else if (diff < 90 * MINUTE_MILLIS) {
-            return "an hour ago";
-        } else if (diff < 24 * HOUR_MILLIS) {
-            return diff / HOUR_MILLIS + " hours ago";
-        } else if (diff < 48 * HOUR_MILLIS) {
-            return "yesterday";
-        } else {
-            return diff / DAY_MILLIS + " days ago";
-        }
+        return DateUtils.getRelativeTimeSpanString(context, time).toString();
     }
 
 }

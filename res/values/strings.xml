@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Twitrr</string>
-    <string name="titleText">Twitter</string>
+    <string name="titleText">Twitrr</string>
     <string name="profileIconText">Profile Icon</string>
-    <string name="composeNewTweet">Compose new Tweet...</string>
+    <string name="composeNewTweet">Compose new Tweet</string>
     <string name="t140">140</string>
     <string name="tweetButtonLabel">Tweet</string>
-    <string name="closeButtonLabel">Close</string>
+    <string name="backButtonLabel">Back</string>
     <string name="replyButtonLabel">Reply</string>
     <string name="retweetButtonLabel">Retweet</string>
+    <string name="Reload">Reload</string>
+    <string name="Logout">Logout</string>
+    <string name="timeline">Timeline</string>
+    <string name="mentions">Mentions</string>
+    <string name="messages">Messages</string>
+    <string name="compose">Tweet</string>
+
 </resources>

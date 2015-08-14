@@ -1,6 +1,7 @@
-package com.rpatil.twitrr.adapters;
+package com.rpatil.twitrr.ui;
 
-import com.rpatil.twitrr.activities.AuthActivity;
+import com.rpatil.twitrr.ui.activities.AuthActivity;
+
 import twitter4j.TwitterAdapter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterMethod;

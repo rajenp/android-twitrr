@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <item
+        android:id="@+id/reloadMenu"
+        android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_cached_white_24dp"
+        android:title="@string/Reload" />
+    <item
+        android:id="@+id/composeMenu"
+        android:showAsAction="always"
+        android:icon="@drawable/ic_add_circle_outline_white_24dp"
+        android:title="@string/compose" />
+    <item
+        android:id="@+id/logoutMenu"
+        android:showAsAction="never"
+        android:icon="@drawable/ic_input_white_24dp"
+        android:title="@string/Logout" />
+</menu>
